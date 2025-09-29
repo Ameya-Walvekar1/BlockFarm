@@ -1,5 +1,5 @@
 {
-  "name": "farmtrace-backend",
+  "name": "farmtrace-frontend",
   "version": "1.0.0",
   "description": "Backend API for FarmTrace blockchain application with mobile QR code support",
   "main": "src/app.js",
@@ -10,6 +10,7 @@
     "mobile-test": "bash ../scripts/test-mobile-connection.sh"
   },
   "dependencies": {
+    "proxy": "https://localhost:3001",
     "express": "^4.18.2",
     "fabric-network": "^2.2.20",
     "fabric-client": "^1.4.20",

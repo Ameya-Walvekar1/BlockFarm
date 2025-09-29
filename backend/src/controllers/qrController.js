@@ -15,6 +15,7 @@ class QRController {
 
             const productData = JSON.parse(product);
             const qrCode = await qrService.generateQRCode(productData);
+	    console.log('Generated QR Code Base64 string:', qrCode.dataURL);
 
             res.json({
                 success: true,

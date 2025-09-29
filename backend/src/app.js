@@ -6,6 +6,19 @@ const os = require('os');
 require('dotenv').config();
 
 const app = express();
+// --- Manual CORS Middleware (no external package needed) ---
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // allow all domains
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  
+  // intercept OPTIONS method for preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || '0.0.0.0';
 
@@ -45,6 +58,32 @@ app.use(express.urlencoded({ extended: true }));
 const routes = require('./routes');
 app.use('/api', routes);
 
+app.post('/api/farmer/product/create', async (req, res) => {
+  try {
+    const { id, name, description } = req.body; // Adjust fields as needed
+
+    // Connect to blockchain contract (implement as per your blockchain setup)
+    const contract = await connectToBlockchain();
+
+    // Submit create product transaction
+    await contract.submitTransaction('CreateProduct', id, name, description);
+
+    // Construct QR code data (e.g., verification URL)
+    const qrData = `http://3.110.122.11:3001/verify/${id}`;
+
+    // Respond with product info and QR data
+    res.json({
+      success: true,
+      product: { id, name, description },
+      qrCodeData: qrData,
+      message: 'Product created and QR code generated',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ 
@@ -56,8 +95,8 @@ app.get('/health', (req, res) => {
             port: PORT,
             localIP: localIP,
             accessUrls: [
-                'http://localhost:' + PORT,
-                'http://' + localIP + ':' + PORT
+                'http://localhost:' + '3001',
+                'http://' + localIP + ':' + '3001'
             ]
         }
     });

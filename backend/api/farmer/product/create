@@ -1,0 +1,51 @@
+import { useState } from 'react';
+import QRCode from 'qrcode.react';
+
+export default function ProductCreate() {
+  const [product, setProduct] = useState({ id: '', name: '', description: '' });
+  const [qrData, setQrData] = useState('');
+
+  const handleChange = (e) => {
+    setProduct({ ...product, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/farmer/product/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setQrData(data.qrCodeData);
+      alert('Product created successfully!');
+    } else {
+      alert('Error: ' + data.message);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Create Product and Generate QR Code</h2>
+      <form onSubmit={handleSubmit}>
+        <input name="id" placeholder="Product ID" value={product.id} onChange={handleChange} required />
+        <input name="name" placeholder="Product Name" value={product.name} onChange={handleChange} required />
+        <input name="description" placeholder="Description" value={product.description} onChange={handleChange} />
+        <button type="submit">Create Product</button>
+      </form>
+
+      {qrData && (
+        <div>
+          <h3>QR Code:</h3>
+          <QRCode value={qrData} />
+          <p>{qrData}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
